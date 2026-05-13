@@ -1,0 +1,13 @@
+WITH deduplicated AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY ad_id, date
+            ORDER BY timestamp DESC
+        ) AS rn
+    FROM `skelar-496208.Skelar_Homework_1.Marketing_ads`
+)
+
+SELECT *
+FROM deduplicated
+WHERE rn = 1;
