@@ -1,0 +1,28 @@
+WITH deduplicated AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY ad_id, date
+            ORDER BY timestamp DESC
+        ) AS rn
+    FROM `skelar-496208.Skelar_Homework_1.Marketing_ads`
+)
+
+SELECT
+    source,
+
+    DATE_TRUNC(date, MONTH) AS month,
+
+    ROUND(SUM(spend), 2) AS total_spend,
+
+    SUM(registrations) AS total_registrations,
+
+    ROUND(
+        SUM(spend) / SUM(registrations),
+        2
+    ) AS cac
+
+FROM deduplicated
+WHERE rn = 1
+GROUP BY source, month
+ORDER BY source, month;
