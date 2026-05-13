@@ -1,0 +1,43 @@
+WITH deduplicated AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY ad_id, date
+            ORDER BY timestamp DESC
+        ) AS rn
+    FROM `skelar-496208.Skelar_Homework_1.Marketing_ads`
+)
+
+SELECT
+    source,
+
+    ROUND(SUM(spend), 2) AS total_spend,
+
+    ROUND(
+        SUM(spend) / SUM(impressions) * 1000,
+        2
+    ) AS cpm,
+
+    ROUND(
+        SUM(clicks) * 100.0 / SUM(impressions),
+        2
+    ) AS ctr_pct,
+
+    ROUND(
+        SUM(installs) * 100.0 / SUM(clicks),
+        2
+    ) AS cr_click_install_pct,
+
+    ROUND(
+        SUM(registrations) * 100.0 / SUM(installs),
+        2
+    ) AS cr_install_reg_pct,
+
+    ROUND(
+        SUM(spend) / SUM(registrations),
+        2
+    ) AS cac
+
+FROM deduplicated
+WHERE rn = 1
+GROUP BY source;
